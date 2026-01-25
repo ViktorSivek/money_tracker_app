@@ -131,13 +131,14 @@ CREATE TABLE income (
 ## Implementation Order
 
 ```
-1. [ ] Database: Add income table migration
-2. [ ] Add Income Dialog component
-3. [ ] Month Selector component
-4. [ ] Update Dashboard with monthly cards
-5. [ ] Transactions page with filters
-6. [ ] Category breakdown visualization
-7. [ ] (Optional) Monthly summary table
+1. [x] Database: Add income table migration (002_income_table.sql)
+2. [x] Add Income Dialog component
+3. [x] Month Selector component
+4. [x] Update Dashboard with monthly cards
+5. [x] Monthly Trend Chart (Area/Bar chart toggle)
+6. [ ] Transactions page with filters
+7. [ ] Category breakdown visualization
+8. [ ] (Optional) Monthly summary table
 ```
 
 ---

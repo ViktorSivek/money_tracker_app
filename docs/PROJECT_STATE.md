@@ -1,38 +1,39 @@
 # WealthOS - Project State
 
 **Last Updated:** January 25, 2026  
-**Version:** 0.1.0 (Foundation)  
-**Status:** ✅ Stable - Ready for MVP Development
+**Version:** 0.2.0 (MVP Phase 1)  
+**Status:** ✅ Stable - Income Management Implemented
 
 ---
 
 ## Current Implementation Status
 
-### ✅ Completed (Phase 1 & 2)
+### ✅ Completed (Foundation + MVP Phase 1)
 
 | Feature              | Status  | Notes                                       |
 | -------------------- | ------- | ------------------------------------------- |
 | Next.js 15 Setup     | ✅ Done | App Router, TypeScript, Turbopack           |
 | Tailwind CSS v4      | ✅ Done | Dark theme, custom colors                   |
 | Shadcn/UI Components | ✅ Done | Button, Card, Dialog, Form, etc.            |
-| Tremor Charts        | ✅ Done | Installed (not yet used)                    |
+| Tremor Charts        | ✅ Done | Area & Bar charts with toggle               |
 | Supabase Auth        | ✅ Done | Email/Password login & signup               |
 | Auth Middleware      | ✅ Done | Protected routes                            |
 | Responsive Layout    | ✅ Done | Desktop sidebar + Mobile bottom tabs        |
 | Dashboard UI         | ✅ Done | Net Worth, Liquid Cash, Budget Health cards |
-| Database Schema      | ✅ Done | SQL migration ready                         |
+| Database Schema      | ✅ Done | SQL migrations ready (001, 002)             |
+| Income Management    | ✅ Done | Add income with account balance update      |
+| Monthly Overview     | ✅ Done | Month selector, summary cards, trend chart  |
 
 ### 🔲 Not Yet Implemented
 
-| Feature           | Priority | Notes                  |
-| ----------------- | -------- | ---------------------- |
-| Income Management | HIGH     | Manual income entry    |
-| Monthly Overview  | HIGH     | Month selector, totals |
-| Transactions Page | HIGH     | List with filters      |
-| Accounts Page     | MEDIUM   | Balance management     |
-| Goals Page        | MEDIUM   | Savings buckets        |
-| Portfolio Page    | LOW      | Investment tracking    |
-| Settings Page     | LOW      | User preferences       |
+| Feature            | Priority | Notes                     |
+| ------------------ | -------- | ------------------------- |
+| Transactions Page  | HIGH     | List with filters         |
+| Category Breakdown | HIGH     | Pie/bar chart by category |
+| Accounts Page      | MEDIUM   | Balance management        |
+| Goals Page         | MEDIUM   | Savings buckets           |
+| Portfolio Page     | LOW      | Investment tracking       |
+| Settings Page      | LOW      | User preferences          |
 
 ---
 
@@ -64,7 +65,7 @@ Deployment:
 
 - `transactions` - Bank transactions (expenses only, negative amounts)
 
-### Created by Migration
+### Created by Migration (001_initial_schema.sql)
 
 - `accounts` - Bank accounts, cash tracking
 - `budgets` - Monthly budget limits per category
@@ -72,9 +73,10 @@ Deployment:
 - `investments` - Portfolio tracking
 - `categories` - Predefined expense categories
 
-### To Be Created
+### Created by Migration (002_income_table.sql) - NEW
 
-- `income` - Manual income entries (or use accounts for balance updates)
+- `income` - Manual income entries with optional account balance update
+- `add_income_with_balance_update()` - PostgreSQL function for atomic income + balance update
 
 ---
 
@@ -83,21 +85,34 @@ Deployment:
 ```
 src/
 ├── app/
-│   ├── (auth)/           # Login, Signup
-│   ├── (dashboard)/      # Main app (protected)
-│   │   ├── page.tsx      # Dashboard home
-│   │   └── layout.tsx    # Sidebar/tabs layout
-│   └── auth/callback/    # OAuth callback
+│   ├── (auth)/              # Login, Signup
+│   ├── (dashboard)/         # Main app (protected)
+│   │   ├── page.tsx         # Dashboard home
+│   │   └── layout.tsx       # Sidebar/tabs layout
+│   └── auth/callback/       # OAuth callback
 ├── components/
-│   ├── ui/               # Shadcn components
-│   ├── dashboard/        # KPI cards
-│   └── layout/           # Sidebar, bottom tabs
+│   ├── ui/                  # Shadcn components
+│   ├── dashboard/           # Dashboard components
+│   │   ├── index.ts         # Clean exports
+│   │   ├── net-worth-card.tsx
+│   │   ├── liquid-cash-card.tsx
+│   │   ├── budget-health-card.tsx
+│   │   ├── month-selector.tsx
+│   │   ├── monthly-summary-cards.tsx
+│   │   ├── monthly-trend-chart.tsx
+│   │   ├── monthly-overview.tsx
+│   │   └── add-income-dialog.tsx
+│   └── layout/              # Sidebar, bottom tabs
 ├── lib/
-│   ├── supabase/         # Client utilities
-│   ├── utils.ts          # Helpers
-│   └── constants.ts      # Config
+│   ├── supabase/            # Client utilities
+│   ├── services/            # Business logic (clean architecture)
+│   │   ├── index.ts
+│   │   ├── income.service.ts
+│   │   └── monthly-summary.service.ts
+│   ├── utils.ts             # Helpers
+│   └── constants.ts         # Config
 └── types/
-    └── database.ts       # TypeScript types
+    └── database.ts          # TypeScript types + Income types
 ```
 
 ---
@@ -119,7 +134,30 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 
 ---
 
+## Next Steps
+
+### Immediate (Before Using)
+
+1. **Run Migration**: Execute `002_income_table.sql` in Supabase SQL Editor
+2. **Create Account**: Add at least one account (e.g., "Revolut", "Cash") to link income to
+
+### MVP Phase 2 (Next Session)
+
+1. **Transactions Page** - View all transactions with month/category filters
+2. **Category Breakdown** - Pie chart showing spending by category
+3. **Income List** - View/edit/delete income entries
+
+### Future Enhancements
+
+- Recurring income (auto-add monthly salary)
+- Budget alerts when overspending
+- Export monthly reports
+- Multi-user support (share with partner)
+
+---
+
 ## Git History
 
 - `0bf47d3` - Initial commit
-- `[pending]` - Foundation complete (auth, dashboard UI, layout)
+- `c1baa99` - Foundation complete (auth, dashboard UI, layout)
+- `[current]` - MVP Phase 1: Income management, monthly overview, trend charts

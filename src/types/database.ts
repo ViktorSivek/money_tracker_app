@@ -6,6 +6,33 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+// Income category enum
+export type IncomeCategory =
+  | "Salary"
+  | "Freelance"
+  | "Investment"
+  | "Bonus"
+  | "Gift"
+  | "Other";
+
+export const INCOME_CATEGORIES: IncomeCategory[] = [
+  "Salary",
+  "Freelance",
+  "Investment",
+  "Bonus",
+  "Gift",
+  "Other",
+];
+
+export const INCOME_CATEGORY_EMOJI: Record<IncomeCategory, string> = {
+  Salary: "💼",
+  Freelance: "💻",
+  Investment: "📈",
+  Bonus: "🎉",
+  Gift: "🎁",
+  Other: "💰",
+};
+
 export interface Database {
   public: {
     Tables: {
@@ -213,6 +240,41 @@ export interface Database {
           unique_id?: string;
         };
       };
+      income: {
+        Row: {
+          id: string;
+          user_id: string;
+          account_id: string | null;
+          amount: number;
+          description: string | null;
+          income_date: string;
+          category: IncomeCategory;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          account_id?: string | null;
+          amount: number;
+          description?: string | null;
+          income_date: string;
+          category?: IncomeCategory;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          account_id?: string | null;
+          amount?: number;
+          description?: string | null;
+          income_date?: string;
+          category?: IncomeCategory;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       user_net_worth: {
@@ -259,3 +321,22 @@ export type InvestmentUpdate =
   Database["public"]["Tables"]["investments"]["Update"];
 
 export type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
+
+export type Income = Database["public"]["Tables"]["income"]["Row"];
+export type IncomeInsert = Database["public"]["Tables"]["income"]["Insert"];
+export type IncomeUpdate = Database["public"]["Tables"]["income"]["Update"];
+
+// Monthly summary types for dashboard
+export interface MonthlySummary {
+  month: Date;
+  totalIncome: number;
+  totalExpenses: number;
+  savings: number;
+}
+
+export interface MonthlyTrendData {
+  month: string; // "Jan 2026"
+  income: number;
+  expenses: number;
+  savings: number;
+}

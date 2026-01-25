@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
-import { NetWorthCard } from "@/components/dashboard/net-worth-card";
-import { LiquidCashCard } from "@/components/dashboard/liquid-cash-card";
-import { BudgetHealthCard } from "@/components/dashboard/budget-health-card";
+import {
+  NetWorthCard,
+  LiquidCashCard,
+  BudgetHealthCard,
+  MonthlyOverview,
+} from "@/components/dashboard";
 import { getCurrentMonthRange } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
@@ -112,6 +115,7 @@ async function getDashboardData() {
   const recentTransactions = transactions?.slice(0, 5) || [];
 
   return {
+    accounts: accounts || [],
     totalAccounts,
     totalInvestments,
     totalLiquidAccounts,
@@ -135,6 +139,7 @@ export default async function DashboardPage() {
   }
 
   const {
+    accounts,
     totalAccounts,
     totalInvestments,
     totalLiquidAccounts,
@@ -152,6 +157,9 @@ export default async function DashboardPage() {
           Your financial command center
         </p>
       </div>
+
+      {/* Monthly Overview - Income, Expenses, Savings */}
+      <MonthlyOverview accounts={accounts} />
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2">
