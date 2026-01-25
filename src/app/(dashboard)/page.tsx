@@ -170,7 +170,7 @@ export default async function DashboardPage() {
         <BudgetHealthCard budgets={budgetItems} />
 
         {/* Recent Transactions */}
-        <Card className="bg-gradient-to-br from-card to-card/80 border-border/50">
+        <Card className="bg-linear-to-br from-card to-card/80 border-border/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-base font-semibold">
               Recent Transactions
@@ -201,7 +201,7 @@ export default async function DashboardPage() {
                         )}
                       </div>
                       <div>
-                        <p className="text-sm font-medium truncate max-w-[150px]">
+                        <p className="text-sm font-medium truncate max-w-37.5">
                           {tx.merchant_clean ||
                             tx.original_description ||
                             "Unknown"}
