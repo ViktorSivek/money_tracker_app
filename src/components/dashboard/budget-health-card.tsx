@@ -38,7 +38,7 @@ export function BudgetHealthCard({ budgets }: BudgetHealthCardProps) {
   const overallPercentage = calculateBudgetPercentage(totalSpent, totalLimit);
 
   return (
-    <Card className="bg-gradient-to-br from-card to-card/80 border-border/50">
+    <Card className="bg-linear-to-br from-card to-card/80 border-border/50">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-semibold">
@@ -71,7 +71,7 @@ export function BudgetHealthCard({ budgets }: BudgetHealthCardProps) {
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">
                     <span>{budget.emoji || "📦"}</span>
-                    <span className="font-medium truncate max-w-[120px]">
+                    <span className="font-medium truncate max-w-30">
                       {budget.category}
                     </span>
                   </div>

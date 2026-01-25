@@ -16,7 +16,7 @@ export function LiquidCashCard({
   const liquidCash = totalLiquidAccounts - totalAllocatedGoals;
 
   return (
-    <Card className="bg-gradient-to-br from-card to-card/80 border-border/50">
+    <Card className="bg-linear-to-br from-card to-card/80 border-border/50">
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="space-y-1">
