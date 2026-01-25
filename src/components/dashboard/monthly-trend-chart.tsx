@@ -45,7 +45,7 @@ export function MonthlyTrendChart({
           <Skeleton className="h-5 w-32" />
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-[250px] w-full" />
+          <Skeleton className="h-62.5 w-full" />
         </CardContent>
       </Card>
     );
@@ -90,12 +90,12 @@ export function MonthlyTrendChart({
       </CardHeader>
       <CardContent>
         {!hasData ? (
-          <div className="flex items-center justify-center h-[250px] text-muted-foreground text-sm">
+          <div className="flex items-center justify-center h-62.5 text-muted-foreground text-sm">
             No data available. Add income to see trends.
           </div>
         ) : chartType === "area" ? (
           <AreaChart
-            className="h-[250px]"
+            className="h-62.5"
             data={data}
             index="month"
             categories={["income", "expenses"]}
@@ -133,7 +133,7 @@ export function MonthlyTrendChart({
           />
         ) : (
           <BarChart
-            className="h-[250px]"
+            className="h-62.5"
             data={data}
             index="month"
             categories={["income", "expenses", "savings"]}
