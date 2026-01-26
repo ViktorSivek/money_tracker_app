@@ -139,12 +139,24 @@ npm run lint
 
 ## Deployment
 
-The app is designed to be deployed on Vercel:
+This app is configured for automated deployment to Vercel with CI/CD pipeline.
 
-1. Push to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy!
+**📖 See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete setup instructions.**
+
+Quick overview:
+
+1. Connect GitHub repo to Vercel
+2. Add environment variables in Vercel dashboard
+3. Add GitHub secrets for CI pipeline
+4. Push to `main` → Auto-deploy!
+
+Every push to `main` triggers:
+
+- ✅ ESLint checks
+- ✅ TypeScript validation
+- ✅ Security audit
+- ✅ Build test
+- ✅ Automatic Vercel deployment
 
 ## License
 
