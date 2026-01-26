@@ -21,7 +21,6 @@ export interface MonthlyServiceResult<T> {
   error: string | null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class MonthlySummaryService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(private supabase: SupabaseClient<any>) {}
@@ -234,8 +233,8 @@ export class MonthlySummaryService {
 /**
  * Factory function to create MonthlySummaryService instance
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createMonthlySummaryService(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>
 ): MonthlySummaryService {
   return new MonthlySummaryService(supabase);

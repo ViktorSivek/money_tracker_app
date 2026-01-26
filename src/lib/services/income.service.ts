@@ -19,7 +19,6 @@ export interface IncomeServiceResult<T> {
   error: string | null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class IncomeService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(private supabase: SupabaseClient<any>) {}
@@ -265,8 +264,8 @@ export class IncomeService {
 /**
  * Factory function to create IncomeService instance
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createIncomeService(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>
 ): IncomeService {
   return new IncomeService(supabase);
