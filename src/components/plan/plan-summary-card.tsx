@@ -28,7 +28,7 @@ export function PlanSummaryCard({ summary, isLoading }: PlanSummaryCardProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {[...Array(4)].map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center justify-between">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-4 w-24" />
@@ -42,8 +42,10 @@ export function PlanSummaryCard({ summary, isLoading }: PlanSummaryCardProps) {
 
   const data = summary || {
     expectedIncome: 0,
+    actualIncome: 0,
     investmentTarget: 0,
     totalBudgeted: 0,
+    totalSpent: 0,
     remaining: 0,
   };
 

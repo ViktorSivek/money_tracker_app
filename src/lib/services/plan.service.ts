@@ -1,6 +1,7 @@
 /**
  * Plan Service
  * Handles monthly plan data operations (expected income, investment target, budgets)
+ * Now supports month-specific planning
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -22,9 +23,20 @@ export interface CategoryBudgetWithSpending {
 
 export interface PlanSummary {
   expectedIncome: number;
+  actualIncome: number;
   investmentTarget: number;
   totalBudgeted: number;
+  totalSpent: number;
   remaining: number;
+}
+
+/**
+ * Get first day of month as YYYY-MM-DD string
+ */
+export function getMonthString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}-01`;
 }
 
 export class PlanService {
@@ -32,9 +44,9 @@ export class PlanService {
   constructor(private supabase: SupabaseClient<any>) {}
 
   /**
-   * Get the user's monthly plan
+   * Get the user's monthly plan for a specific month
    */
-  async getPlan(): Promise<PlanServiceResult<MonthlyPlan>> {
+  async getPlan(month: Date): Promise<PlanServiceResult<MonthlyPlan>> {
     const {
       data: { user },
     } = await this.supabase.auth.getUser();
@@ -43,14 +55,16 @@ export class PlanService {
       return { data: null, error: "User not authenticated" };
     }
 
+    const monthString = getMonthString(month);
+
     const { data, error } = await this.supabase
       .from("monthly_plan")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .eq("month", monthString)
+      .maybeSingle();
 
-    if (error && error.code !== "PGRST116") {
-      // PGRST116 is "no rows returned"
+    if (error) {
       return { data: null, error: error.message };
     }
 
@@ -58,9 +72,10 @@ export class PlanService {
   }
 
   /**
-   * Create or update the user's monthly plan
+   * Create or update the user's monthly plan for a specific month
    */
   async upsertPlan(
+    month: Date,
     expectedIncome: number,
     investmentTarget: number
   ): Promise<PlanServiceResult<MonthlyPlan>> {
@@ -72,15 +87,18 @@ export class PlanService {
       return { data: null, error: "User not authenticated" };
     }
 
+    const monthString = getMonthString(month);
+
     const { data, error } = await this.supabase
       .from("monthly_plan")
       .upsert(
         {
           user_id: user.id,
+          month: monthString,
           expected_income: expectedIncome,
           investment_target: investmentTarget,
         },
-        { onConflict: "user_id" }
+        { onConflict: "user_id,month" }
       )
       .select()
       .single();
@@ -93,9 +111,10 @@ export class PlanService {
   }
 
   /**
-   * Update expected income only
+   * Update expected income only for a specific month
    */
   async updateExpectedIncome(
+    month: Date,
     expectedIncome: number
   ): Promise<PlanServiceResult<MonthlyPlan>> {
     const {
@@ -106,18 +125,21 @@ export class PlanService {
       return { data: null, error: "User not authenticated" };
     }
 
+    const monthString = getMonthString(month);
+
     // First try to get existing plan
-    const existing = await this.getPlan();
+    const existing = await this.getPlan(month);
 
     const { data, error } = await this.supabase
       .from("monthly_plan")
       .upsert(
         {
           user_id: user.id,
+          month: monthString,
           expected_income: expectedIncome,
           investment_target: existing.data?.investment_target ?? 0,
         },
-        { onConflict: "user_id" }
+        { onConflict: "user_id,month" }
       )
       .select()
       .single();
@@ -130,9 +152,10 @@ export class PlanService {
   }
 
   /**
-   * Update investment target only
+   * Update investment target only for a specific month
    */
   async updateInvestmentTarget(
+    month: Date,
     investmentTarget: number
   ): Promise<PlanServiceResult<MonthlyPlan>> {
     const {
@@ -143,18 +166,21 @@ export class PlanService {
       return { data: null, error: "User not authenticated" };
     }
 
+    const monthString = getMonthString(month);
+
     // First try to get existing plan
-    const existing = await this.getPlan();
+    const existing = await this.getPlan(month);
 
     const { data, error } = await this.supabase
       .from("monthly_plan")
       .upsert(
         {
           user_id: user.id,
+          month: monthString,
           expected_income: existing.data?.expected_income ?? 0,
           investment_target: investmentTarget,
         },
-        { onConflict: "user_id" }
+        { onConflict: "user_id,month" }
       )
       .select()
       .single();
@@ -192,11 +218,11 @@ export class PlanService {
   }
 
   /**
-   * Get budgets with current month spending
+   * Get budgets with spending for a specific month
    */
-  async getBudgetsWithSpending(): Promise<
-    PlanServiceResult<CategoryBudgetWithSpending[]>
-  > {
+  async getBudgetsWithSpending(
+    month: Date
+  ): Promise<PlanServiceResult<CategoryBudgetWithSpending[]>> {
     const {
       data: { user },
     } = await this.supabase.auth.getUser();
@@ -211,10 +237,9 @@ export class PlanService {
       return { data: null, error: budgetsResult.error };
     }
 
-    // Get current month spending by category from transactions
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    // Get spending for the specific month
+    const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+    const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
 
     const { data: transactions, error: txError } = await this.supabase
       .from("transactions")
@@ -254,6 +279,38 @@ export class PlanService {
       }) || [];
 
     return { data: budgetsWithSpending, error: null };
+  }
+
+  /**
+   * Get actual income for a specific month from income table only
+   */
+  async getActualIncome(month: Date): Promise<PlanServiceResult<number>> {
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
+
+    if (!user) {
+      return { data: null, error: "User not authenticated" };
+    }
+
+    const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+    const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+
+    const { data: incomeData, error: incomeError } = await this.supabase
+      .from("income")
+      .select("amount")
+      .eq("user_id", user.id)
+      .gte("income_date", startOfMonth.toISOString().split("T")[0])
+      .lte("income_date", endOfMonth.toISOString().split("T")[0]);
+
+    if (incomeError) {
+      console.error("Error fetching income:", incomeError);
+      return { data: null, error: incomeError.message };
+    }
+
+    const totalIncome = incomeData?.reduce((sum, inc) => sum + Number(inc.amount), 0) || 0;
+
+    return { data: totalIncome, error: null };
   }
 
   /**
@@ -357,11 +414,14 @@ export class PlanService {
   }
 
   /**
-   * Get plan summary (income - budgets - investments = remaining)
+   * Get plan summary for a specific month
+   * Includes actual income vs expected, spending, etc.
    */
-  async getPlanSummary(): Promise<PlanServiceResult<PlanSummary>> {
-    const planResult = await this.getPlan();
+  async getPlanSummary(month: Date): Promise<PlanServiceResult<PlanSummary>> {
+    const planResult = await this.getPlan(month);
     const budgetsResult = await this.getBudgets();
+    const actualIncomeResult = await this.getActualIncome(month);
+    const budgetsWithSpendingResult = await this.getBudgetsWithSpending(month);
 
     if (planResult.error) {
       return { data: null, error: planResult.error };
@@ -371,9 +431,14 @@ export class PlanService {
       return { data: null, error: budgetsResult.error };
     }
 
+    if (actualIncomeResult.error) {
+      return { data: null, error: actualIncomeResult.error };
+    }
+
     const expectedIncome = planResult.data?.expected_income
       ? Number(planResult.data.expected_income)
       : 0;
+    const actualIncome = actualIncomeResult.data || 0;
     const investmentTarget = planResult.data?.investment_target
       ? Number(planResult.data.investment_target)
       : 0;
@@ -382,13 +447,18 @@ export class PlanService {
         (sum, b) => sum + Number(b.monthly_limit),
         0
       ) || 0;
+    const totalSpent =
+      budgetsWithSpendingResult.data?.reduce((sum, b) => sum + b.spent, 0) || 0;
+
     const remaining = expectedIncome - totalBudgeted - investmentTarget;
 
     return {
       data: {
         expectedIncome,
+        actualIncome,
         investmentTarget,
         totalBudgeted,
+        totalSpent,
         remaining,
       },
       error: null,

@@ -100,6 +100,156 @@ export class IncomeService {
   }
 
   /**
+   * Get total income for the current year
+   */
+  async getYearlyTotal(): Promise<IncomeServiceResult<number>> {
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
+
+    if (!user) {
+      return { data: null, error: "User not authenticated" };
+    }
+
+    const now = new Date();
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear(), 11, 31);
+
+    const { data, error } = await this.supabase
+      .from("income")
+      .select("amount")
+      .eq("user_id", user.id)
+      .gte("income_date", startOfYear.toISOString().split("T")[0])
+      .lte("income_date", endOfYear.toISOString().split("T")[0]);
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    const total = data?.reduce((sum, income) => sum + Number(income.amount), 0) || 0;
+    return { data: total, error: null };
+  }
+
+  /**
+   * Get all-time total income
+   */
+  async getAllTimeTotal(): Promise<IncomeServiceResult<number>> {
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
+
+    if (!user) {
+      return { data: null, error: "User not authenticated" };
+    }
+
+    const { data, error } = await this.supabase
+      .from("income")
+      .select("amount")
+      .eq("user_id", user.id);
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    const total = data?.reduce((sum, income) => sum + Number(income.amount), 0) || 0;
+    return { data: total, error: null };
+  }
+
+  /**
+   * Get income for a specific date range
+   */
+  async getByDateRange(
+    startDate: Date,
+    endDate: Date
+  ): Promise<IncomeServiceResult<Income[]>> {
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
+
+    if (!user) {
+      return { data: null, error: "User not authenticated" };
+    }
+
+    const { data, error } = await this.supabase
+      .from("income")
+      .select("*")
+      .eq("user_id", user.id)
+      .gte("income_date", startDate.toISOString().split("T")[0])
+      .lte("income_date", endDate.toISOString().split("T")[0])
+      .order("income_date", { ascending: false });
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: data as Income[], error: null };
+  }
+
+  /**
+   * Get income statistics: this month, this year, all time, and average monthly
+   */
+  async getStatistics(): Promise<IncomeServiceResult<{
+    thisMonth: number;
+    lastMonth: number;
+    thisYear: number;
+    allTime: number;
+    averageMonthly: number;
+  }>> {
+    const {
+      data: { user },
+    } = await this.supabase.auth.getUser();
+
+    if (!user) {
+      return { data: null, error: "User not authenticated" };
+    }
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    // Get this month total
+    const thisMonthResult = await this.getMonthlyTotal(currentYear, currentMonth);
+    if (thisMonthResult.error) {
+      return { data: null, error: thisMonthResult.error };
+    }
+
+    // Get last month total
+    const lastMonthResult = await this.getMonthlyTotal(lastMonthYear, lastMonth);
+    if (lastMonthResult.error) {
+      return { data: null, error: lastMonthResult.error };
+    }
+
+    // Get this year total
+    const thisYearResult = await this.getYearlyTotal();
+    if (thisYearResult.error) {
+      return { data: null, error: thisYearResult.error };
+    }
+
+    // Get all time total
+    const allTimeResult = await this.getAllTimeTotal();
+    if (allTimeResult.error) {
+      return { data: null, error: allTimeResult.error };
+    }
+
+    // Calculate average monthly income (year to date)
+    const monthsElapsed = currentMonth + 1; // +1 because months are 0-indexed
+    const averageMonthly = monthsElapsed > 0 ? (thisYearResult.data || 0) / monthsElapsed : 0;
+
+    return {
+      data: {
+        thisMonth: thisMonthResult.data || 0,
+        lastMonth: lastMonthResult.data || 0,
+        thisYear: thisYearResult.data || 0,
+        allTime: allTimeResult.data || 0,
+        averageMonthly,
+      },
+      error: null,
+    };
+  }
+
+  /**
    * Add a new income entry
    * Optionally updates the linked account balance
    */

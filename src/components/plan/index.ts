@@ -13,3 +13,5 @@ export {
   AddBudgetButton,
 } from "./category-budget-dialog";
 export { PlanSummaryCard } from "./plan-summary-card";
+export { MonthSelector } from "./month-selector";
+export { IncomeProgressBar } from "./income-progress-bar";

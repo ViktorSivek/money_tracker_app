@@ -279,6 +279,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
+          month: string; // Date string in YYYY-MM-DD format
           expected_income: number;
           investment_target: number;
           created_at: string;
@@ -287,6 +288,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
+          month: string; // Date string in YYYY-MM-DD format
           expected_income?: number;
           investment_target?: number;
           created_at?: string;
@@ -295,6 +297,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
+          month?: string; // Date string in YYYY-MM-DD format
           expected_income?: number;
           investment_target?: number;
           created_at?: string;

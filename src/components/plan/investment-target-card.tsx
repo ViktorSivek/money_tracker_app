@@ -16,11 +16,13 @@ import { createPlanService } from "@/lib/services";
 
 interface InvestmentTargetCardProps {
   investmentTarget: number;
+  month: Date;
   onUpdate: () => void;
 }
 
 export function InvestmentTargetCard({
   investmentTarget,
+  month,
   onUpdate,
 }: InvestmentTargetCardProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -34,7 +36,7 @@ export function InvestmentTargetCard({
       const service = createPlanService(supabase);
 
       const numValue = parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
-      const result = await service.updateInvestmentTarget(numValue);
+      const result = await service.updateInvestmentTarget(month, numValue);
 
       if (!result.error) {
         setIsEditing(false);
