@@ -15,16 +15,14 @@ import {
   createMonthlySummaryService,
   type MonthlySummaryData,
 } from "@/lib/services";
-import type { Account, MonthlyTrendData } from "@/types/database";
+import type { MonthlyTrendData } from "@/types/database";
 
 interface MonthlyOverviewProps {
-  accounts: Account[];
   initialYear?: number;
   initialMonth?: number;
 }
 
 export function MonthlyOverview({
-  accounts,
   initialYear,
   initialMonth,
 }: MonthlyOverviewProps) {
@@ -81,7 +79,7 @@ export function MonthlyOverview({
       {/* Header with Month Selector and Add Income Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <MonthSelector year={year} month={month} onChange={handleMonthChange} />
-        <AddIncomeDialog accounts={accounts} onSuccess={handleIncomeAdded} />
+        <AddIncomeDialog onSuccess={handleIncomeAdded} />
       </div>
 
       {/* Monthly Summary Cards */}

@@ -7,10 +7,15 @@ A mobile-first personal finance web application that acts as a "Decision Engine"
 ## Features
 
 - 📊 **Dashboard** - Net Worth, Liquid Cash, and Budget Health at a glance
-- 💰 **Accounts** - Track bank accounts and cash balances
+- 📋 **Plan** - Monthly budget planning with expected income and category limits
 - 🎯 **Goals** - Virtual savings buckets for financial goals
 - 📈 **Portfolio** - Investment tracking with P&L visualization
-- 📝 **Transactions** - Read-only view of categorized transactions (via n8n automation)
+- 📝 **Transactions** - View and manage income and expense transactions
+
+## Documentation
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Complete architecture, database schema, and implementation details
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - Deployment and CI/CD setup guide
 
 ## Tech Stack
 
@@ -62,8 +67,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ### 4. Run Database Migrations
 
 1. Open your Supabase project's **SQL Editor**
-2. Copy the contents of `supabase/migrations/001_initial_schema.sql`
-3. Run the SQL to create all required tables
+2. Run each migration file in order:
+   - `supabase/migrations/001_initial_schema.sql`
+   - `supabase/migrations/002_income_table.sql`
+   - `supabase/migrations/003_monthly_plan.sql`
 
 ### 5. Start Development Server
 
@@ -98,28 +105,36 @@ src/
 
 The app uses the following tables:
 
-- `accounts` - Bank accounts and cash tracking
-- `budgets` - Monthly budget limits per category
+- `monthly_plan` - User's monthly budget plan (expected income, investment target)
+- `budgets` - Monthly spending limits per category
+- `income` - Manual income entries (salary, freelance, etc.)
+- `transactions` - Bank transactions and expenses
 - `goals` - Savings goals ("virtual buckets")
 - `investments` - Portfolio tracking
 - `categories` - Predefined expense categories
-- `transactions` - (Existing) Transaction data from n8n
+- `accounts` - *(Legacy)* Previously used for account tracking
 
-See `supabase/migrations/001_initial_schema.sql` for the full schema.
+See migrations in `supabase/migrations/` for the complete schema.
+
+**📖 Full schema documentation in [ARCHITECTURE.md](ARCHITECTURE.md)**
 
 ## Key Concepts
 
-### Transactions are Read-Only
+### One Unified Account
 
-This app doesn't import transactions. An external automation (n8n) handles bank transaction import and categorization. The app simply visualizes this data.
+The app treats all money as **one liquid cash pool**. No need to track multiple bank accounts - focus on budgeting instead.
 
-### Investment Prices from Database
+### Plan-Based Budgeting
 
-Investment prices are updated by n8n automation, not fetched from APIs. The app reads `current_price` from the database.
+Set your expected monthly income, allocate to category budgets and investments, and see what remains. Track actual spending vs planned with visual progress bars.
+
+### Manual Transaction Entry
+
+Add income and expense transactions manually. The app supports importing bank transactions from CSV for expenses.
 
 ### Goals as Virtual Buckets
 
-Goals represent mental accounting - money "allocated" to goals reduces your Liquid Cash but doesn't actually move money between accounts.
+Goals represent mental accounting - money "allocated" to goals is still in your account but mentally set aside for a purpose.
 
 ## Development
 

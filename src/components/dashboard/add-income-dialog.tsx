@@ -34,14 +34,12 @@ import {
   INCOME_CATEGORY_EMOJI,
   type IncomeCategory,
 } from "@/types/database";
-import type { Account } from "@/types/database";
 
 interface AddIncomeDialogProps {
-  accounts: Account[];
   onSuccess?: () => void;
 }
 
-export function AddIncomeDialog({ accounts, onSuccess }: AddIncomeDialogProps) {
+export function AddIncomeDialog({ onSuccess }: AddIncomeDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,14 +52,12 @@ export function AddIncomeDialog({ accounts, onSuccess }: AddIncomeDialogProps) {
   const [incomeDate, setIncomeDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [accountId, setAccountId] = useState<string>("none");
 
   const resetForm = () => {
     setAmount("");
     setDescription("");
     setCategory("Salary");
     setIncomeDate(new Date().toISOString().split("T")[0]);
-    setAccountId("none");
     setError(null);
   };
 
@@ -82,38 +78,18 @@ export function AddIncomeDialog({ accounts, onSuccess }: AddIncomeDialogProps) {
         return;
       }
 
-      // Check if a real account is selected (not "none")
-      const selectedAccountId = accountId !== "none" ? accountId : undefined;
+      // Add income record
+      const result = await incomeService.add({
+        amount: parsedAmount,
+        description: description || undefined,
+        incomeDate: new Date(incomeDate),
+        category,
+      });
 
-      // If account is selected, use the atomic function
-      if (selectedAccountId) {
-        const result = await incomeService.addWithBalanceUpdate({
-          amount: parsedAmount,
-          description: description || undefined,
-          incomeDate: new Date(incomeDate),
-          category,
-          accountId: selectedAccountId,
-        });
-
-        if (result.error) {
-          setError(result.error);
-          setIsLoading(false);
-          return;
-        }
-      } else {
-        // Just add income without balance update
-        const result = await incomeService.add({
-          amount: parsedAmount,
-          description: description || undefined,
-          incomeDate: new Date(incomeDate),
-          category,
-        });
-
-        if (result.error) {
-          setError(result.error);
-          setIsLoading(false);
-          return;
-        }
+      if (result.error) {
+        setError(result.error);
+        setIsLoading(false);
+        return;
       }
 
       // Success
@@ -141,9 +117,7 @@ export function AddIncomeDialog({ accounts, onSuccess }: AddIncomeDialogProps) {
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add Income</DialogTitle>
-            <DialogDescription>
-              Record your income. Optionally update your account balance.
-            </DialogDescription>
+            <DialogDescription>Record your income.</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
@@ -207,33 +181,6 @@ export function AddIncomeDialog({ accounts, onSuccess }: AddIncomeDialogProps) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
-            </div>
-
-            {/* Account to update */}
-            <div className="grid gap-2">
-              <Label htmlFor="account">Update Account Balance (optional)</Label>
-              <Select value={accountId} onValueChange={setAccountId}>
-                <SelectTrigger id="account">
-                  <SelectValue placeholder="Select account to update" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">
-                    Don&apos;t update any account
-                  </SelectItem>
-                  {accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id}>
-                      <span className="flex items-center gap-2">
-                        <span>{account.icon}</span>
-                        <span>{account.name}</span>
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                If selected, the income amount will be added to this
-                account&apos;s balance.
-              </p>
             </div>
 
             {/* Error message */}

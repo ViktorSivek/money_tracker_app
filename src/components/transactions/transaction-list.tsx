@@ -40,13 +40,8 @@ import { DeleteTransactionDialog } from "./delete-transaction-dialog";
 import { EditTransactionDialog } from "./edit-transaction-dialog";
 import { AddExpenseDialog } from "./add-expense-dialog";
 import { AddIncomeDialog } from "@/components/dashboard/add-income-dialog";
-import type { Account } from "@/types/database";
 
-interface TransactionListProps {
-  accounts: Account[];
-}
-
-export function TransactionList({ accounts }: TransactionListProps) {
+export function TransactionList() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"expense" | "income">("expense");
   const [transactions, setTransactions] = useState<UnifiedTransaction[]>([]);
@@ -176,10 +171,7 @@ export function TransactionList({ accounts }: TransactionListProps) {
           {activeTab === "expense" ? (
             <AddExpenseDialog onSuccess={handleTransactionUpdated} />
           ) : (
-            <AddIncomeDialog
-              accounts={accounts}
-              onSuccess={handleTransactionUpdated}
-            />
+            <AddIncomeDialog onSuccess={handleTransactionUpdated} />
           )}
         </div>
 
@@ -222,10 +214,7 @@ export function TransactionList({ accounts }: TransactionListProps) {
             onDelete={openDeleteDialog}
             emptyMessage="No income found"
             emptyAction={
-              <AddIncomeDialog
-                accounts={accounts}
-                onSuccess={handleTransactionUpdated}
-              />
+              <AddIncomeDialog onSuccess={handleTransactionUpdated} />
             }
           />
         </TabsContent>

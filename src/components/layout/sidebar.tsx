@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Wallet,
+  ClipboardList,
   Target,
   TrendingUp,
   Receipt,
@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Accounts", href: "/accounts", icon: Wallet },
+  { name: "Plan", href: "/plan", icon: ClipboardList },
   { name: "Goals", href: "/goals", icon: Target },
   { name: "Portfolio", href: "/portfolio", icon: TrendingUp },
   { name: "Transactions", href: "/transactions", icon: Receipt },

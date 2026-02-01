@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import type {
-  Account,
   Goal,
   Investment,
   Budget,
@@ -28,12 +27,6 @@ async function getDashboardData() {
   if (!user) {
     return null;
   }
-
-  // Get accounts
-  const { data: accounts } = (await supabase
-    .from("accounts")
-    .select("*")
-    .eq("user_id", user.id)) as { data: Account[] | null };
 
   // Get goals
   const { data: goals } = (await supabase
@@ -72,19 +65,11 @@ async function getDashboardData() {
   };
 
   // Calculate totals
-  const totalAccounts =
-    accounts?.reduce((sum, acc) => sum + Number(acc.balance), 0) || 0;
-
   const totalInvestments =
     investments?.reduce(
       (sum, inv) => sum + Number(inv.quantity) * Number(inv.current_price || 0),
       0
     ) || 0;
-
-  const totalLiquidAccounts =
-    accounts
-      ?.filter((acc) => !acc.is_investment)
-      .reduce((sum, acc) => sum + Number(acc.balance), 0) || 0;
 
   const totalAllocatedGoals =
     goals?.reduce((sum, goal) => sum + Number(goal.current_amount), 0) || 0;
@@ -115,10 +100,7 @@ async function getDashboardData() {
   const recentTransactions = transactions?.slice(0, 5) || [];
 
   return {
-    accounts: accounts || [],
-    totalAccounts,
     totalInvestments,
-    totalLiquidAccounts,
     totalAllocatedGoals,
     budgetItems,
     recentTransactions,
@@ -139,10 +121,7 @@ export default async function DashboardPage() {
   }
 
   const {
-    accounts,
-    totalAccounts,
     totalInvestments,
-    totalLiquidAccounts,
     totalAllocatedGoals,
     budgetItems,
     recentTransactions,
@@ -159,16 +138,16 @@ export default async function DashboardPage() {
       </div>
 
       {/* Monthly Overview - Income, Expenses, Savings */}
-      <MonthlyOverview accounts={accounts} />
+      <MonthlyOverview />
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2">
         <NetWorthCard
-          totalAccounts={totalAccounts}
+          totalAccounts={0}
           totalInvestments={totalInvestments}
         />
         <LiquidCashCard
-          totalLiquidAccounts={totalLiquidAccounts}
+          totalLiquidAccounts={0}
           totalAllocatedGoals={totalAllocatedGoals}
         />
       </div>

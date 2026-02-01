@@ -36,3 +36,11 @@ export {
   type UpdateExpenseParams,
   type ExpenseServiceResult,
 } from "./expense.service";
+
+export {
+  PlanService,
+  createPlanService,
+  type PlanServiceResult,
+  type CategoryBudgetWithSpending,
+  type PlanSummary,
+} from "./plan.service";

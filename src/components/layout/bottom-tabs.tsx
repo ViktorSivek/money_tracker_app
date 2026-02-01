@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Wallet,
+  ClipboardList,
   Target,
   Receipt,
   Settings,
@@ -13,7 +13,7 @@ import {
 
 const tabs = [
   { name: "Home", href: "/", icon: LayoutDashboard },
-  { name: "Accounts", href: "/accounts", icon: Wallet },
+  { name: "Plan", href: "/plan", icon: ClipboardList },
   { name: "Transactions", href: "/transactions", icon: Receipt },
   { name: "Goals", href: "/goals", icon: Target },
   { name: "Settings", href: "/settings", icon: Settings },

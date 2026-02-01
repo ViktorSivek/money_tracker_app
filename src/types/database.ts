@@ -275,6 +275,32 @@ export interface Database {
           updated_at?: string;
         };
       };
+      monthly_plan: {
+        Row: {
+          id: string;
+          user_id: string;
+          expected_income: number;
+          investment_target: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          expected_income?: number;
+          investment_target?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          expected_income?: number;
+          investment_target?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       user_net_worth: {
@@ -325,6 +351,12 @@ export type Transaction = Database["public"]["Tables"]["transactions"]["Row"];
 export type Income = Database["public"]["Tables"]["income"]["Row"];
 export type IncomeInsert = Database["public"]["Tables"]["income"]["Insert"];
 export type IncomeUpdate = Database["public"]["Tables"]["income"]["Update"];
+
+export type MonthlyPlan = Database["public"]["Tables"]["monthly_plan"]["Row"];
+export type MonthlyPlanInsert =
+  Database["public"]["Tables"]["monthly_plan"]["Insert"];
+export type MonthlyPlanUpdate =
+  Database["public"]["Tables"]["monthly_plan"]["Update"];
 
 // Monthly summary types for dashboard
 export interface MonthlySummary {
