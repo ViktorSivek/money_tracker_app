@@ -12,15 +12,20 @@ export function cn(...inputs: ClassValue[]) {
 export function formatCurrency(
   amount: number,
   currency: CurrencyCode = DEFAULT_CURRENCY,
-  options?: { showSign?: boolean; compact?: boolean }
+  options?: { showSign?: boolean; compact?: boolean; minimumFractionDigits?: number; maximumFractionDigits?: number }
 ): string {
   const config = CURRENCIES[currency];
-  const { showSign = false, compact = false } = options || {};
+  const {
+    showSign = false,
+    compact = false,
+    minimumFractionDigits,
+    maximumFractionDigits
+  } = options || {};
 
   const formatter = new Intl.NumberFormat(config.locale, {
     style: "decimal",
-    minimumFractionDigits: compact ? 0 : 2,
-    maximumFractionDigits: compact ? 0 : 2,
+    minimumFractionDigits: minimumFractionDigits ?? (compact ? 0 : 2),
+    maximumFractionDigits: maximumFractionDigits ?? (compact ? 0 : 2),
     notation: compact ? "compact" : "standard",
   });
 

@@ -129,12 +129,6 @@ export function TransactionTable({
                           year: "numeric",
                         })}
                       </span>
-                      {tx.isManual && (
-                        <>
-                          <span>•</span>
-                          <span className="text-primary">Manual</span>
-                        </>
-                      )}
                     </div>
                   </div>
                 </div>
