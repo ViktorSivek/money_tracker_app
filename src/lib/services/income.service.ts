@@ -5,6 +5,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Income, IncomeCategory, IncomeInsert } from "@/types/database";
+import { formatDateForDB } from "@/lib/utils";
 
 export interface AddIncomeParams {
   amount: number;
@@ -66,12 +67,20 @@ export class IncomeService {
     const startDate = new Date(year, month, 1);
     const endDate = new Date(year, month + 1, 0); // Last day of month
 
+    // Format dates without timezone conversion
+    const formatDate = (date: Date): string => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
     const { data, error } = await this.supabase
       .from("income")
       .select("*")
       .eq("user_id", user.id)
-      .gte("income_date", startDate.toISOString().split("T")[0])
-      .lte("income_date", endDate.toISOString().split("T")[0])
+      .gte("income_date", formatDate(startDate))
+      .lte("income_date", formatDate(endDate))
       .order("income_date", { ascending: false });
 
     if (error) {
@@ -119,8 +128,8 @@ export class IncomeService {
       .from("income")
       .select("amount")
       .eq("user_id", user.id)
-      .gte("income_date", startOfYear.toISOString().split("T")[0])
-      .lte("income_date", endOfYear.toISOString().split("T")[0]);
+      .gte("income_date", formatDateForDB(startOfYear))
+      .lte("income_date", formatDateForDB(endOfYear));
 
     if (error) {
       return { data: null, error: error.message };
@@ -170,12 +179,20 @@ export class IncomeService {
       return { data: null, error: "User not authenticated" };
     }
 
+    // Format dates without timezone conversion
+    const formatDate = (date: Date): string => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
     const { data, error } = await this.supabase
       .from("income")
       .select("*")
       .eq("user_id", user.id)
-      .gte("income_date", startDate.toISOString().split("T")[0])
-      .lte("income_date", endDate.toISOString().split("T")[0])
+      .gte("income_date", formatDate(startDate))
+      .lte("income_date", formatDate(endDate))
       .order("income_date", { ascending: false });
 
     if (error) {

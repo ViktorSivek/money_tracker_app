@@ -5,6 +5,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Income, Transaction, MonthlyTrendData } from "@/types/database";
+import { formatDateForDB } from "@/lib/utils";
 
 export interface MonthlySummaryData {
   month: Date;
@@ -43,8 +44,8 @@ export class MonthlySummaryService {
     const startDate = new Date(year, month, 1);
     const endDate = new Date(year, month + 1, 0); // Last day of month
 
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
+    const startDateStr = formatDateForDB(startDate);
+    const endDateStr = formatDateForDB(endDate);
 
     // Fetch income for the month
     const { data: incomeData, error: incomeError } = await this.supabase
@@ -125,8 +126,8 @@ export class MonthlySummaryService {
       1
     );
 
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
+    const startDateStr = formatDateForDB(startDate);
+    const endDateStr = formatDateForDB(endDate);
 
     // Fetch all income in the range
     const { data: incomeData, error: incomeError } = await this.supabase
@@ -253,8 +254,8 @@ export class MonthlySummaryService {
     const endDate = new Date(year, month + 1, 0); // Last day of month
     const daysInMonth = endDate.getDate();
 
-    const startDateStr = startDate.toISOString().split("T")[0];
-    const endDateStr = endDate.toISOString().split("T")[0];
+    const startDateStr = formatDateForDB(startDate);
+    const endDateStr = formatDateForDB(endDate);
 
     // Fetch all income for the month
     const { data: incomeData, error: incomeError } = await this.supabase

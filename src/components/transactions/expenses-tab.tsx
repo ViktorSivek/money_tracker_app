@@ -47,35 +47,43 @@ export function ExpensesTab({ selectedPeriod, selectedMonth, onMonthChange }: Ex
       let periodEnd: string;
       let label: string;
 
+      // Helper function to format date as YYYY-MM-DD without timezone issues
+      const formatDateString = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       // Determine period dates
       switch (selectedPeriod) {
         case "this-month":
-          periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
-          periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+          periodStart = formatDateString(new Date(now.getFullYear(), now.getMonth(), 1));
+          periodEnd = formatDateString(new Date(now.getFullYear(), now.getMonth() + 1, 0));
           label = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
           break;
 
         case "this-year":
-          periodStart = new Date(now.getFullYear(), 0, 1).toISOString().split("T")[0];
-          periodEnd = new Date(now.getFullYear(), 11, 31).toISOString().split("T")[0];
+          periodStart = formatDateString(new Date(now.getFullYear(), 0, 1));
+          periodEnd = formatDateString(new Date(now.getFullYear(), 11, 31));
           label = `${now.getFullYear()} Total`;
           break;
 
         case "all-time":
-          periodStart = "1970-01-01"; // Far past date
-          periodEnd = new Date(now.getFullYear() + 1, 11, 31).toISOString().split("T")[0];
+          periodStart = "1970-01-01";
+          periodEnd = formatDateString(new Date(now.getFullYear() + 1, 11, 31));
           label = "All Time";
           break;
 
         case "custom":
-          periodStart = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1).toISOString().split("T")[0];
-          periodEnd = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0).toISOString().split("T")[0];
+          periodStart = formatDateString(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1));
+          periodEnd = formatDateString(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 0));
           label = selectedMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" });
           break;
 
         default:
-          periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split("T")[0];
-          periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split("T")[0];
+          periodStart = formatDateString(new Date(now.getFullYear(), now.getMonth(), 1));
+          periodEnd = formatDateString(new Date(now.getFullYear(), now.getMonth() + 1, 0));
           label = "This Month";
       }
 

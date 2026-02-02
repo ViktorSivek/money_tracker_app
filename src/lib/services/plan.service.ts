@@ -6,6 +6,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { MonthlyPlan, Budget, BudgetInsert } from "@/types/database";
+import { formatDateForDB } from "@/lib/utils";
 
 export interface PlanServiceResult<T> {
   data: T | null;
@@ -300,8 +301,8 @@ export class PlanService {
       .from("income")
       .select("amount")
       .eq("user_id", user.id)
-      .gte("income_date", startOfMonth.toISOString().split("T")[0])
-      .lte("income_date", endOfMonth.toISOString().split("T")[0]);
+      .gte("income_date", formatDateForDB(startOfMonth))
+      .lte("income_date", formatDateForDB(endOfMonth));
 
     if (incomeError) {
       console.error("Error fetching income:", incomeError);
