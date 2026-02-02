@@ -30,12 +30,17 @@ export function MonthlySummaryCards({
 }: MonthlySummaryCardsProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <Card key={i} className="bg-card/50 border-border/50">
-            <CardContent className="p-4">
-              <Skeleton className="h-4 w-16 mb-2" />
-              <Skeleton className="h-6 w-24" />
+            <CardContent className="p-6">
+              <div className="text-center space-y-3">
+                <Skeleton className="h-10 w-10 rounded-full mx-auto" />
+                <div>
+                  <Skeleton className="h-3 w-16 mb-2 mx-auto" />
+                  <Skeleton className="h-7 w-24 mx-auto" />
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -44,68 +49,82 @@ export function MonthlySummaryCards({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-4">
       {/* Income Card */}
-      <Card className="bg-linear-to-br from-chart-2/10 to-chart-2/5 border-chart-2/20">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="h-4 w-4 text-chart-2" />
-            <span className="text-xs text-muted-foreground font-medium">
-              Income
-            </span>
+      <Card className="bg-gradient-to-br from-chart-2/5 to-card border-chart-2/20">
+        <CardContent className="p-6">
+          <div className="text-center space-y-3">
+            <div className="inline-flex p-2.5 rounded-full bg-chart-2/10 mx-auto">
+              <TrendingUp className="h-5 w-5 text-chart-2" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium mb-1.5">
+                Income
+              </p>
+              <p className="text-2xl font-bold font-mono-numbers text-chart-2">
+                {formatCurrency(totalIncome, currency, { showSign: true, minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+            </div>
           </div>
-          <p className="text-lg font-bold font-mono-numbers text-chart-2">
-            {formatCurrency(totalIncome, currency, { showSign: true })}
-          </p>
         </CardContent>
       </Card>
 
       {/* Expenses Card */}
-      <Card className="bg-linear-to-br from-destructive/10 to-destructive/5 border-destructive/20">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingDown className="h-4 w-4 text-destructive" />
-            <span className="text-xs text-muted-foreground font-medium">
-              Expenses
-            </span>
+      <Card className="bg-gradient-to-br from-destructive/5 to-card border-destructive/20">
+        <CardContent className="p-6">
+          <div className="text-center space-y-3">
+            <div className="inline-flex p-2.5 rounded-full bg-destructive/10 mx-auto">
+              <TrendingDown className="h-5 w-5 text-destructive" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium mb-1.5">
+                Expenses
+              </p>
+              <p className="text-2xl font-bold font-mono-numbers text-destructive">
+                {formatCurrency(-totalExpenses, currency, { showSign: true, minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+            </div>
           </div>
-          <p className="text-lg font-bold font-mono-numbers text-destructive">
-            {formatCurrency(-totalExpenses, currency, { showSign: true })}
-          </p>
         </CardContent>
       </Card>
 
       {/* Savings Card */}
       <Card
-        className={`bg-linear-to-br ${
+        className={`bg-gradient-to-br ${
           savings >= 0
-            ? "from-primary/10 to-primary/5 border-primary/20"
-            : "from-destructive/10 to-destructive/5 border-destructive/20"
+            ? "from-primary/5 to-card border-primary/20"
+            : "from-destructive/5 to-card border-destructive/20"
         }`}
       >
-        <CardContent className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <PiggyBank
-              className={`h-4 w-4 ${
-                savings >= 0 ? "text-primary" : "text-destructive"
-              }`}
-            />
-            <span className="text-xs text-muted-foreground font-medium">
-              Savings
-            </span>
+        <CardContent className="p-6">
+          <div className="text-center space-y-3">
+            <div className={`inline-flex p-2.5 rounded-full mx-auto ${
+              savings >= 0 ? "bg-primary/10" : "bg-destructive/10"
+            }`}>
+              <PiggyBank
+                className={`h-5 w-5 ${
+                  savings >= 0 ? "text-primary" : "text-destructive"
+                }`}
+              />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground font-medium mb-1.5">
+                Savings
+              </p>
+              <p
+                className={`text-2xl font-bold font-mono-numbers ${
+                  savings >= 0 ? "text-primary" : "text-destructive"
+                }`}
+              >
+                {formatCurrency(savings, currency, { showSign: true, minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+              {totalIncome > 0 && (
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  {savingsRate.toFixed(0)}% of income
+                </p>
+              )}
+            </div>
           </div>
-          <p
-            className={`text-lg font-bold font-mono-numbers ${
-              savings >= 0 ? "text-primary" : "text-destructive"
-            }`}
-          >
-            {formatCurrency(savings, currency, { showSign: true })}
-          </p>
-          {totalIncome > 0 && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {savingsRate.toFixed(0)}% of income
-            </p>
-          )}
         </CardContent>
       </Card>
     </div>

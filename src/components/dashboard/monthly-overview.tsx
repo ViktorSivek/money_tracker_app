@@ -9,13 +9,11 @@ import { useState, useEffect, useCallback } from "react";
 import { MonthSelector } from "./month-selector";
 import { MonthlySummaryCards } from "./monthly-summary-cards";
 import { MonthlyTrendChart } from "./monthly-trend-chart";
-import { AddIncomeDialog } from "./add-income-dialog";
 import { createClient } from "@/lib/supabase/client";
 import {
   createMonthlySummaryService,
   type MonthlySummaryData,
 } from "@/lib/services";
-import type { MonthlyTrendData } from "@/types/database";
 
 interface MonthlyOverviewProps {
   initialYear?: number;
@@ -33,7 +31,11 @@ export function MonthlyOverview({
   const [summaryData, setSummaryData] = useState<MonthlySummaryData | null>(
     null
   );
-  const [trendData, setTrendData] = useState<MonthlyTrendData[]>([]);
+  const [dailyData, setDailyData] = useState<Array<{
+    day: string;
+    income: number;
+    expenses: number;
+  }>>([]);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -48,10 +50,10 @@ export function MonthlyOverview({
         setSummaryData(summaryResult.data);
       }
 
-      // Fetch trend data (last 6 months)
-      const trendResult = await summaryService.getMonthlyTrend(6);
-      if (trendResult.data) {
-        setTrendData(trendResult.data);
+      // Fetch daily accumulation data for the selected month
+      const dailyResult = await summaryService.getDailyAccumulation(year, month);
+      if (dailyResult.data) {
+        setDailyData(dailyResult.data);
       }
     } catch (error) {
       console.error("Error fetching monthly data:", error);
@@ -69,17 +71,11 @@ export function MonthlyOverview({
     setMonth(newMonth);
   };
 
-  const handleIncomeAdded = () => {
-    // Refresh data after adding income
-    fetchData();
-  };
-
   return (
     <div className="space-y-4">
-      {/* Header with Month Selector and Add Income Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* Month Selector */}
+      <div className="flex justify-center">
         <MonthSelector year={year} month={month} onChange={handleMonthChange} />
-        <AddIncomeDialog onSuccess={handleIncomeAdded} />
       </div>
 
       {/* Monthly Summary Cards */}
@@ -91,8 +87,8 @@ export function MonthlyOverview({
         isLoading={isLoading}
       />
 
-      {/* Monthly Trend Chart */}
-      <MonthlyTrendChart data={trendData} isLoading={isLoading} />
+      {/* Daily Accumulation Chart */}
+      <MonthlyTrendChart data={dailyData} isLoading={isLoading} />
     </div>
   );
 }

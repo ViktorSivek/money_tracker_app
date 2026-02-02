@@ -13,8 +13,6 @@ export function LiquidCashCard({
   totalLiquidAccounts,
   totalAllocatedGoals,
 }: LiquidCashCardProps) {
-  const liquidCash = totalLiquidAccounts - totalAllocatedGoals;
-
   return (
     <Card className="bg-linear-to-br from-card to-card/80 border-border/50">
       <CardContent className="p-6">
@@ -24,7 +22,7 @@ export function LiquidCashCard({
               Liquid Cash
             </p>
             <p className="text-3xl font-bold font-mono-numbers tracking-tight text-chart-2">
-              {formatCurrency(liquidCash)}
+              {formatCurrency(totalLiquidAccounts)}
             </p>
           </div>
           <div className="p-3 rounded-xl bg-chart-2/10">
@@ -33,7 +31,7 @@ export function LiquidCashCard({
         </div>
 
         <p className="mt-2 text-xs text-muted-foreground">
-          Available to spend after goal allocations
+          Your bank account balance (all income - all expenses)
         </p>
 
         <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-2 gap-4">

@@ -9,12 +9,12 @@ import { getCurrentMonthRange } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { createTransactionService } from "@/lib/services";
 import type {
   Goal,
   Investment,
   Budget,
   Category,
-  Transaction,
 } from "@/types/database";
 
 async function getDashboardData() {
@@ -53,16 +53,34 @@ async function getDashboardData() {
     data: Pick<Category, "name" | "emoji">[] | null;
   };
 
-  // Get current month transactions
+  // Use TransactionService to get all transactions from both tables
+  const transactionService = createTransactionService(supabase);
+
+  // Get all transactions for account balance calculation
+  const allTransactionsResult = await transactionService.getAll();
+
+  // Calculate account balance (all income - all expenses)
+  const totalIncome =
+    allTransactionsResult.data
+      ?.filter((tx) => tx.type === "income")
+      .reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
+
+  const totalExpenses =
+    allTransactionsResult.data
+      ?.filter((tx) => tx.type === "expense")
+      .reduce((sum, tx) => sum + Math.abs(tx.amount), 0) || 0;
+
+  const accountBalance = totalIncome - totalExpenses;
+
+  // Get current month transactions for recent transactions display
   const { start, end } = getCurrentMonthRange();
-  const { data: transactions } = (await supabase
-    .from("transactions")
-    .select("*")
-    .gte("transaction_date", start.toISOString())
-    .lte("transaction_date", end.toISOString())
-    .order("transaction_date", { ascending: false })) as {
-    data: Transaction[] | null;
-  };
+  const monthTransactionsResult = await transactionService.getAll({
+    startDate: start.toISOString().split("T")[0],
+    endDate: end.toISOString().split("T")[0],
+  });
+
+  // Get recent transactions (last 5, both income and expenses)
+  const recentTransactions = monthTransactionsResult.data?.slice(0, 5) || [];
 
   // Calculate totals
   const totalInvestments =
@@ -80,8 +98,8 @@ async function getDashboardData() {
   );
 
   const spendingByCategory = new Map<string, number>();
-  transactions?.forEach((tx) => {
-    if (tx.amount < 0 && tx.category) {
+  monthTransactionsResult.data?.forEach((tx) => {
+    if (tx.type === "expense" && tx.category) {
       const current = spendingByCategory.get(tx.category) || 0;
       spendingByCategory.set(tx.category, current + Math.abs(tx.amount));
     }
@@ -96,10 +114,8 @@ async function getDashboardData() {
       limit: Number(budget.monthly_limit),
     })) || [];
 
-  // Get recent transactions (last 5)
-  const recentTransactions = transactions?.slice(0, 5) || [];
-
   return {
+    accountBalance,
     totalInvestments,
     totalAllocatedGoals,
     budgetItems,
@@ -121,6 +137,7 @@ export default async function DashboardPage() {
   }
 
   const {
+    accountBalance,
     totalInvestments,
     totalAllocatedGoals,
     budgetItems,
@@ -137,20 +154,20 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Monthly Overview - Income, Expenses, Savings */}
-      <MonthlyOverview />
-
-      {/* KPI Cards */}
+      {/* Main KPI Cards - Net Worth and Liquid Cash */}
       <div className="grid gap-4 md:grid-cols-2">
         <NetWorthCard
-          totalAccounts={0}
+          totalAccounts={accountBalance}
           totalInvestments={totalInvestments}
         />
         <LiquidCashCard
-          totalLiquidAccounts={0}
+          totalLiquidAccounts={accountBalance}
           totalAllocatedGoals={totalAllocatedGoals}
         />
       </div>
+
+      {/* Monthly Overview - Month Selector, Income, Expenses, Savings, Graph */}
+      <MonthlyOverview />
 
       {/* Budget Health & Recent Transactions */}
       <div className="grid gap-4 lg:grid-cols-2">
@@ -178,10 +195,10 @@ export default async function DashboardPage() {
                     <div className="flex items-center gap-3">
                       <div
                         className={`p-2 rounded-lg ${
-                          tx.amount < 0 ? "bg-destructive/10" : "bg-chart-2/10"
+                          tx.type === "expense" ? "bg-destructive/10" : "bg-chart-2/10"
                         }`}
                       >
-                        {tx.amount < 0 ? (
+                        {tx.type === "expense" ? (
                           <ArrowUpRight className="w-4 h-4 text-destructive" />
                         ) : (
                           <ArrowDownLeft className="w-4 h-4 text-chart-2" />
@@ -189,13 +206,11 @@ export default async function DashboardPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium truncate max-w-37.5">
-                          {tx.merchant_clean ||
-                            tx.original_description ||
-                            "Unknown"}
+                          {tx.description}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {tx.category || "Uncategorized"} •{" "}
-                          {formatDate(tx.transaction_date, {
+                          {formatDate(tx.date, {
                             day: "numeric",
                             month: "short",
                           })}
@@ -204,10 +219,10 @@ export default async function DashboardPage() {
                     </div>
                     <p
                       className={`text-sm font-semibold font-mono-numbers ${
-                        tx.amount < 0 ? "text-destructive" : "text-chart-2"
+                        tx.type === "expense" ? "text-destructive" : "text-chart-2"
                       }`}
                     >
-                      {formatCurrency(tx.amount, "CZK", { showSign: true })}
+                      {formatCurrency(tx.type === "expense" ? -Math.abs(tx.amount) : Math.abs(tx.amount), "CZK", { showSign: true })}
                     </p>
                   </div>
                 ))}
